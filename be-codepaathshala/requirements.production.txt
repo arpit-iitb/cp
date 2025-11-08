@@ -1,0 +1,39 @@
+# Production-specific Python dependencies
+# Install with: pip install -r requirements.txt -r requirements.production.txt
+
+# Base requirements
+-r requirements.txt
+
+# Error Tracking & Monitoring
+sentry-sdk==1.39.2  # Error tracking and performance monitoring
+django-redis==5.4.0  # Redis cache backend for Django
+
+# Security
+django-ratelimit==4.1.0  # Rate limiting for views
+pip-audit==2.6.3  # Security vulnerability scanner
+
+# Performance
+django-debug-toolbar==4.3.0  # Development only - should be disabled in production
+gunicorn[gevent]==21.2.0  # WSGI server with gevent workers for better performance
+
+# Database
+psycopg2-binary==2.9.9  # PostgreSQL adapter (already in requirements.txt but ensure latest)
+
+# AWS S3 (Optional - for static/media files)
+# Uncomment if using AWS S3 for static/media storage
+# boto3==1.34.108
+# django-storages==1.14.3
+
+# Logging
+python-json-logger==2.0.7  # JSON logging for better log aggregation
+
+# Health Checks
+django-health-check==3.18.1  # Health check endpoints
+
+# Additional Security
+django-cors-headers==4.3.1  # Already in requirements.txt
+django-csp==3.8  # Content Security Policy
+
+# Monitoring (Optional)
+# newrelic==9.5.0  # New Relic APM
+# ddtrace==2.5.0  # Datadog APM
