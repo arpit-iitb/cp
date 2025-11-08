@@ -1,0 +1,7 @@
+.player .vp-access-gate-container,
+.player .vp-content-area-background,
+.player .vp-player-ui-container,
+.player .vp-player-ui-overlays {
+    border-radius: 8px !important;
+    border: 1px solid #afd0ff !important;
+}

@@ -1,0 +1,11 @@
+.h-98 {
+    height: 28em !important;
+}
+
+@media screen and (max-width:576px) {
+    .h-98 {
+        height: auto !important;
+    }
+}
+
+

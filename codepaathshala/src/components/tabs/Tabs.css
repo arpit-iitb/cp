@@ -1,0 +1,8 @@
+.MuiTabs-flexContainer {
+    height: 100%;
+    justify-content: space-evenly;
+}
+.tabs .active {
+    border-bottom: 2px solid red !important;
+    background: #eaeaea !important;
+}

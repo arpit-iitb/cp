@@ -1,0 +1,91 @@
+version: '3'
+
+services:
+  django_app:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - static_vol:/app/static
+      - media_vol:/app/media
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+  
+  redis:
+    image: redis:7.0-alpine
+    restart: unless-stopped
+    # do not expose redis to the host in production; keep it internal
+    ports: []
+    expose:
+      - "6379"
+  
+  celery-worker:
+    build: .
+    command: >
+      sh -c "celery -A codingjudge worker --pool=prefork --concurrency=5 -l info"
+    depends_on:
+      - django_app
+      - redis
+    restart: unless-stopped
+  
+  celery-beat:
+    build: .
+    command: >
+      sh -c "celery -A codingjudge beat --loglevel=info"
+    depends_on:
+      - celery-worker
+      - redis
+    restart: unless-stopped
+  
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_vol:/app/static
+      - media_vol:/app/media
+    ports:
+      -  "80:80"
+    depends_on:
+      - django_app
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./codepaathshala
+      dockerfile: Dockerfile
+    command: sh -c "if [ -f package-lock.json ]; then npm ci --silent; else npm install --silent; fi && npm run build && cp -r build/* /app/static/ || true"
+    volumes:
+      - static_vol:/app/static
+    env_file:
+      - .env
+    restart: 'no'
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-codepaathshala_db}
+      POSTGRES_USER: ${DB_USER:-cp_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change_me}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-cp_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  judge0:
+    build: ./judge0_mock
+    ports: []
+    expose:
+      - "3000"
+    restart: unless-stopped
+    environment:
+      - FLASK_ENV=production
+volumes:
+  static_vol:
+  media_vol:
+  postgres_data:

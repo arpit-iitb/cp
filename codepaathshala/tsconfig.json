@@ -1,0 +1,58 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "target": "es6",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "outDir": "./dist/",
+    "baseUrl": "./src",
+    "rootDir": ".",
+    "paths": {
+      "pages/*": [
+        "pages/*"
+      ],
+      "components/*": [
+        "components/*"
+      ],
+      "routes/*": [
+        "routes/*"
+      ],
+      "hooks/*": [
+        "hooks/*"
+      ],
+      "state/*": [
+        "state/*"
+      ]
+    }
+  },
+  "include": [
+    "src",
+    "webpack.config.js",
+    "cal-heatmap",
+    "vimeo__player.d.ts",
+    "lodash-es/isString",
+    "d3-selection",
+    "d3-fetch",
+  ],
+  "exclude": [
+    "node_modules",
+    "build",
+    "dist"
+  ]
+}

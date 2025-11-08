@@ -1,0 +1,20 @@
+/* the slides */
+.slick-slide {
+    margin: 0 27px;
+    height: inherit !important;
+}
+
+/* the parent */
+.slick-list {
+    margin: 0 -27px;
+}
+
+.slick-track
+{
+    display: flex !important;
+}
+
+.slick-slide > div
+{
+    height: 100%;
+}

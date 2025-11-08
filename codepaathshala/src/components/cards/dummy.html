@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <table style="border: 1px solid #D7E8FF; border-radius: 12px; width: 100%; box-shadow: none;">
+        <tr>
+            <td style="padding: 16px;">
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="vertical-align: top;">
+                            <div style="font-size: 24px; font-weight: bold; color: #5F6368; margin-bottom: 16px;">
+                                {props.data}
+                            </div>
+                            <div style="color: #3C4858; opacity: 0.6;">
+                                {props.title}
+                            </div>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center; background-color: #E0E0E0; border-radius: 50%; width: 64px; height: 64px;">
+                            {props.icon ? `<img src="${props.icon}" alt="icon" style="width: 32px; height: 32px;" />` : '
+                            <span style="font-size: 18px;"></span>'}
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <hr style="border: 1px solid #D7E8FF" />
+    <table>
+
+    </table>
+
+</body>
+
+</html>
+from django.core.mail import EmailMultiAlternatives from django.template.loader import render_to_string from django.conf import settings def send_dashboard_email(): subject = 'Your Dashboard' from_email = settings.DEFAULT_FROM_EMAIL to_email = 'recipient@example.com'
+context = { 'number_of_students': 102, 'active_students': 14, 'time_spent': '82.37 hrs', 'daily_logins': 29, 'total_time_spent_chart': 'https://example.com/path/to/total_time_spent_chart.png', 'daily_activity_chart': 'https://example.com/path/to/daily_activity_chart.png',
+'completion_chart': 'https://example.com/path/to/completion_chart.png', 'student_logins_chart': 'https://example.com/path/to/student_logins_chart.png', 'rankings': [ {'rank': 1, 'name': 'PUCHA ARUN KUMAR', 'score': 4360}, {'rank': 2, 'name': 'Kiran',
+'score': 4050}, {'rank': 3, 'name': 'Avanthika p u', 'score': 3850}, {'rank': 4, 'name': 'N.V.Sricharan', 'score': 3810}, {'rank': 5, 'name': 'Venkata chaitanya teja', 'score': 3720} ] } html_content = render_to_string('email_template.html', context)
+msg = EmailMultiAlternatives(subject, html_content, from_email, [to_email]) msg.attach_alternative(html_content, "text/html") msg.send()
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            padding: 20px;
+        }
+        
+        .header,
+        .content {
+            border: 1px solid #D7E8FF;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .header div,
+        .content div {
+            margin-bottom: 10px;
+        }
+        
+        .chart {
+            width: 100%;
+            height: auto;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .stats div {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="stats">
+                <div>
+                    <h2>{{ number_of_students }}</h2>
+                    <p>Number of Students</p>
+                </div>
+                <div>
+                    <h2>{{ active_students }}</h2>
+                    <p>Active Students</p>
+                </div>
+                <div>
+                    <h2>{{ time_spent }}</h2>
+                    <p>Time Spent by Student</p>
+                </div>
+                <div>
+                    <h2>{{ daily_logins }}</h2>
+                    <p>Student Daily Logins</p>
+                </div>
+            </div>
+        </div>
+        <div class="content">
+            <img src="{{ total_time_spent_chart }}" alt="Total Time Spent by Students" class="chart" />
+            <img src="{{ daily_activity_chart }}" alt="Student Daily Activity" class="chart" />
+            <img src="{{ completion_chart }}" alt="Overall Completion of Course" class="chart" />
+            <img src="{{ student_logins_chart }}" alt="Student Logins" class="chart" />
+        </div>
+        <div class="content">
+            <h3>Rankings</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in rankings %}
+                    <tr>
+                        <td>{{ student.rank }}</td>
+                        <td>{{ student.name }}</td>
+                        <td>{{ student.score }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

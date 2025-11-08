@@ -1,0 +1,16 @@
+.codicon[class*=codicon-] {
+    font: normal normal normal 16px/1 codicon !important
+}
+
+.monaco-editor .find-widget.visible {
+    visibility: hidden;
+}
+
+.monaco-editor,
+.monaco-editor-background {
+    background-color: #000000 !important;
+}
+
+.monaco-editor .margin {
+    background-color: #000000 !important;
+}

@@ -1,0 +1,976 @@
+import { useEffect, useRef, useState } from "react";
+import { AssessmentData, AssessmentInterface, AssessmentItem, AssessmentQuestion, AssignmentIdeInterface, SingleProblemInterface } from "../../_utils/interface";
+import { useParams } from "react-router-dom";
+import { FullScreen, FullScreenHandle, useFullScreenHandle } from "react-full-screen";
+import { useAuth } from "hooks/AuthProvider";
+import { AppBar, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fade, Modal, Typography, useTheme } from "@mui/material";
+import Toolbar from '@mui/material/Toolbar';
+import Box from "@mui/material/Box";
+import WebCamComponent from "components/WebCam";
+import Timer from "components/Timer";
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { AssessmentType, FaceDetectionEnum } from "../../_utils/enum";
+import AssessmentMCQ from "pages/AssessmentPage/AssessmentMCQ";
+import AssignmentIde from "pages/AssignmentIde";
+import FullStackIde from "pages/Full-stack-Ide";
+import ProgramIde from "pages/ProgramIde";
+import "./assessment.css";
+import axiosHttp from "_utils/axios.index";
+import { ApiConstants } from "_utils/api-constants";
+import { AxiosResponse } from "axios";
+
+export default function Assessment() {
+    const [data, setData] = useState<AssessmentData>();
+    const [currentQuestion, setCurrentQuestion] = useState<AssessmentQuestion>();
+    const { id } = useParams();
+    const handle = useFullScreenHandle();
+    const theme = useTheme();
+    const auth = useAuth();
+    const fullScreenRef = useRef<HTMLButtonElement>(null);
+    const [isFullScreen, setFullScreen] = useState<boolean>(false);
+    const [stopTimer, setStopTimer] = useState<boolean>(false);
+    const [expanded, setExpanded] = useState<AssessmentItem>();
+    const [openModal, setOpenModal] = useState<boolean>(false);
+    const [open, setOpen] = useState(false);
+    const [assessmentData, setAssessmentData] = useState<AssessmentInterface>();
+    let [testViolation, setTestViolation] = useState(1);
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+
+    useEffect(() => {
+        if (id) {
+            auth.setShowHeader(false);
+
+            setData({
+                "id": "122",
+                "test_id": "122",
+                "title": "iiit",
+                "description": "placement assessment",
+                "passing_marks": 8,
+                "total_marks": 48,
+                "brand_logo": "sricity",
+                "max_violations": 4,
+                "totalQuestions": 3,
+                "assessmentType": [
+                    AssessmentType.MCQ,
+                    AssessmentType.SUBJECTIVE,
+                    AssessmentType.CODING
+                ],
+                "assessment_items": [
+                    {
+                        "type": AssessmentType.MCQ,
+                        "title": "MCQ set A",
+                        "duration": 1,
+                        "questions": [
+                            {
+                                "id": 1,
+                                "question_text": "q1",
+                                options: [
+                                    { label: "First", value: "a" },
+                                    { label: "Second", value: "b" },
+                                    { label: "Third", value: "c" },
+                                    { label: "Fourth", value: "d" },
+                                ],
+                                "difficulty_level": 1,
+                                "topic": "verbal ability",
+                                flagged: false
+                            },
+                            {
+                                "id": 2,
+                                "question_text": "look at this series: 2, 1, (1/2), (1/4), … What number should come next",
+                                is_multiple: true,
+                                options: [
+                                    { label: "First", value: "a" },
+                                    { label: "Second", value: "b" },
+                                    { label: "Third", value: "c" },
+                                    { label: "Fourth", value: "d" },
+                                ],
+                                "difficulty_level": 2,
+                                "topic": "reasoning",
+                                flagged: false
+                            }
+                        ]
+                    },
+                    {
+                        "type": AssessmentType.CODING,
+                        "title": "set A",
+                        "duration": 90,
+                        "questions": [
+                            {
+                                "id": 3,
+                                "title": "reverse string",
+                                "description": "Write a function that reverses a string. The input string is given as an array of characters s.\r\n\r\nYou must do this by modifying the input array in-place with O(1) extra memory.",
+                                "img_urls": [""],
+                                "input_format": "s = [\"h\",\"e\",\"l\",\"l\",\"o\"]",
+                                "output_format": "[\"o\",\"l\",\"l\",\"e\",\"h\"]",
+                                "constraints": "1 <= s.length <= 105\r\ns[i] is a printable ascii character.",
+                                "difficulty_level": 1,
+                                "full_stack_evaluation": false,
+                                "precode": "",
+                            },
+                            {
+                                "id": 1,
+                                "title": "Two sum",
+                                "description": "add",
+                                "img_urls": [""],
+                                "input_format": "array",
+                                "output_format": "integer",
+                                "constraints": "array =1000",
+                                "difficulty_level": 2,
+                                "full_stack_evaluation": false,
+                                "precode": "",
+                            },
+                            {
+                                "id": 2,
+                                "title": "knapsack",
+                                "description": "dp",
+                                "img_urls": [""],
+                                "input_format": "2d array",
+                                "output_format": "int",
+                                "constraints": "10^5",
+                                "difficulty_level": 3,
+                                "full_stack_evaluation": false,
+                                "precode": "",
+                            }
+                        ]
+                    },
+                    {
+                        "type": AssessmentType.SUBJECTIVE,
+                        "title": "subjective set A",
+                        "duration": 20,
+                        "questions": [
+                            {
+                                "id": 1,
+                                "title": "Sum of pairs",
+                                "description": "xxxxxxxxxxxx",
+                                "difficulty_level": 1,
+                                "grading_prompt": "",
+                            }
+                        ]
+                    }
+                ]
+            })
+
+            setTimeout(() => {
+                setExpanded(data?.assessment_items[0]);
+                setCurrentQuestion(data?.assessment_items[0]?.questions[0]);
+            }, 200)
+        }
+
+        return () => {
+            auth.setShowHeader(true);
+        }
+    }, []);
+
+
+    const handleChange = (panel: AssessmentItem) => (event: React.SyntheticEvent, newExpanded: boolean) => {
+        if (newExpanded) {
+            setExpanded(panel);
+            setCurrentQuestion(panel.questions[0]);
+        }
+    };
+
+    const handleQuestionChange = (question: AssessmentQuestion) => {
+        setCurrentQuestion(question);
+    }
+
+    const handleQuestionUpdate = (updatedQuestion: AssessmentQuestion) => {
+        let tempData = { ...data } as AssessmentData;
+        tempData.assessment_items?.forEach((assessment_item) => {
+            if (assessment_item.type === expanded?.type) {
+                assessment_item.questions.forEach((question) => {
+                    if (question.id === updatedQuestion.id) {
+                        question["flagged"] = !question["flagged"];
+                    }
+                })
+            }
+        });
+        setData(tempData);
+    };
+
+    const timeOutHandler = () => {
+        sessionStorage.removeItem("endTime");
+        setStopTimer(true);
+    }
+    // for test 
+    // useEffect(() => {
+    //     let isMouseDown = false;
+    
+    //     const handleMouseDown = () => {
+    //         isMouseDown = true;
+    //     };
+    
+    //     const handleMouseUp = () => {
+    //         isMouseDown = false;
+    //     };
+    
+    //     const handleMouseMove = (e: MouseEvent) => {
+    //         if (!isMouseDown) return;
+    //         e.stopPropagation();
+    //     };
+    
+    //     const handleKeyDown = (e: KeyboardEvent) => {
+    //         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'r') {
+    //             e.stopPropagation();
+    //             e.preventDefault();
+    //             return;
+    //         }
+    //         if (e.ctrlKey && e.key.toLowerCase() === 'v') {
+    //             e.stopPropagation();
+    //             return;
+    //         }
+    //         if (e.key === "MediaTrackNext") {
+    //             e.stopPropagation();
+    //             return;
+    //         }
+    //         if (e.key === "MediaTrackPrevious") {
+    //             e.stopPropagation();
+    //             return;
+    //         }
+    //         if (e.key === 'F5') {
+    //             e.stopPropagation();
+    //             e.preventDefault();
+    //             return;
+    //         }
+    //         if (e.ctrlKey && e.key.toLowerCase() === 'c') {
+    //             e.stopPropagation();
+    //             return;
+    //         }
+    //         if (e.key === 'Tab' && e.altKey) {
+    //             e.stopPropagation();
+    //             return;
+    //         }
+    //         if (e.key === 'Tab' && e.ctrlKey) {
+    //             e.stopPropagation();
+    //             return;
+    //         }
+    //         if (e.key === 'Alt') {
+    //             e.stopPropagation();
+    //             return;
+    //         }
+    //     };
+    
+    //     const handleVisibilityChange = (e: any) => {
+    //         e.stopPropagation();
+    //         if (document.hidden) {
+    //             setOpenModal(true);
+    //             setFullScreen(false);
+    //         }
+    //     };
+    
+    //     const handleFullScreenChange = () => {
+    //         if (!document.fullscreenElement) {
+    //             handleEscape();
+    //         }
+    //     };
+    
+    //     if (isFullScreen) {
+    //         document.body.classList.add('no-scroll');
+    //         window.addEventListener('contextmenu',handleMouseDown)
+    //         window.addEventListener('mousedown', handleMouseDown);
+    //         window.addEventListener('mouseup', handleMouseUp);
+    //         window.addEventListener('mousemove', handleMouseMove);
+    //         window.addEventListener('touchstart', handleMouseDown);
+    //         window.addEventListener('touchend', handleMouseUp);
+    //         window.addEventListener('touchmove', handleEscape as EventListener);
+    //         window.addEventListener('keydown', handleKeyDown);
+    //         document.addEventListener('visibilitychange', handleVisibilityChange);
+    //         document.addEventListener("fullscreenchange", handleFullScreenChange, false);
+    //     } else {
+    //         document.body.classList.remove('no-scroll');
+    //         window.removeEventListener('contextmenu',handleMouseDown)
+    //         window.removeEventListener('mousedown', handleMouseDown);
+    //         window.removeEventListener('mouseup', handleMouseUp);
+    //         window.removeEventListener('mousemove', handleMouseMove);
+    //         window.removeEventListener('touchstart', handleMouseDown);
+    //         window.removeEventListener('touchend', handleMouseUp);
+    //         window.removeEventListener('touchmove', handleEscape as EventListener);
+    //         window.removeEventListener('keydown', handleKeyDown);
+    //         window.removeEventListener('touchstart', handleEscape as EventListener);
+    //         window.removeEventListener('visibilitychange', handleEscape, false);
+    //         document.removeEventListener("fullscreenchange", handleFullScreenChange, false);
+    //     }
+    
+    //     return () => {
+    //         window.removeEventListener('contextmenu',handleMouseDown)
+    //         window.removeEventListener('mousedown', handleMouseDown);
+    //         window.removeEventListener('mouseup', handleMouseUp);
+    //         window.removeEventListener('mousemove', handleMouseMove);
+    //         window.removeEventListener('touchstart', handleMouseDown);
+    //         window.removeEventListener('touchend', handleMouseUp);
+    //         window.removeEventListener('touchmove', handleEscape as EventListener);
+    //         window.removeEventListener('keydown', handleKeyDown);
+    //         window.removeEventListener('touchstart', handleEscape as EventListener);
+    //         window.removeEventListener('visibilitychange', handleVisibilityChange);
+    //         document.removeEventListener("fullscreenchange", handleFullScreenChange, false);
+    //     };
+    // }, [isFullScreen]);
+    
+    // function handleEscape() {
+    //     setOpenModal(true);
+    //     setFullScreen(false);
+    //     if (document.fullscreenElement) {
+    //         document.exitFullscreen().catch((err) => console.error(`Error exiting full-screen mode: ${err}`));
+    //     }
+    // }
+    
+    
+    const handleFullScreenChange = (state: boolean, fullScreenHandler: FullScreenHandle) => {
+        if (isFullScreen && !state) {
+            setOpenModal(true);
+            setFullScreen(false)
+        }
+    }
+
+    const handleFaceDetectionViolation = (data: { errorType: FaceDetectionEnum, message: string }) => {
+        // alert("face not detected")
+    }
+
+    const countTestViolation = () => {
+        testViolation = testViolation + 1;
+        setTestViolation(testViolation)
+        console.info(testViolation)
+        if (data && (data?.max_violations < testViolation)) {
+            setFullScreen(false)
+        }
+    }
+    const questionData = () => {
+        return <>
+            {
+                data?.assessment_items.map((item, index) => (
+                    <Accordion
+                        key={index}
+                        sx={{
+                            borderRadius: "0.75rem",
+                            marginBottom: "0.5rem",
+                            overflow: "hidden",
+                            border: "1px solid #EBF3FF",  // Custom border color
+                        }}
+                        onChange={handleChange(item)}
+                        expanded={expanded?.type === item.type}
+                        elevation={0}
+                        disableGutters
+                        square
+                        variant="outlined"
+                        defaultExpanded={index === 0}>
+                        <AccordionSummary
+                            sx={{
+                                borderBottom: expanded?.type === item.type ? 'none' : ``,
+                                '& .MuiSvgIcon-root': {
+                                    transform: expanded?.type === item.type ? 'rotate(90deg)' : 'rotate(0deg)',
+                                    transition: 'transform 0.2s',
+                                },
+                            }}
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls={`panel${index}-content`}
+                            id={`panel${index}-header`}
+                        >
+                            <p className={`text-xl font-semibold ${expanded?.type === item.type ? 'text-[#1F1F1F]' : 'text-[#939393]'}`}>{item.title}</p>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <div className="grid grid-cols-5 gap-2">
+                                {item.questions.map((question, qIndex) => (
+                                    <div key={qIndex} className="w-full h-full flex justify-center items-center">
+                                        <div
+                                            onClick={() => handleQuestionChange(question)}
+                                            className={`w-8 h-8 cursor-pointer flex justify-center items-center rounded  border border-[#1F1F1F]
+            ${question?.flagged ? 'border border-orange-400 text-orange-400 bg-[#FFF4EB]' : ''} 
+            ${currentQuestion?.id === question?.id ? 'border border-[#001F68] text-[#001F68] bg-[#EFF4FF]' : ''}`}
+                                        >
+                                            {qIndex + 1}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </AccordionDetails>
+                    </Accordion>
+                ))
+            }
+        </>
+
+    }
+
+    return <section className="min-h-[88svh] h-screen flex items-center justify-center">
+        <div className="text-center">
+            {!isFullScreen && (
+                <Button variant="contained" ref={fullScreenRef} onClick={async () => {
+                    setFullScreen(true);
+                    await handle.enter();
+                }}>Begin now</Button>
+            )
+            }
+
+            <FullScreen onChange={handleFullScreenChange} className="assessment-bg my-3 text-start" handle={handle}>
+                {isFullScreen ? <>
+                    <AppBar component="nav">
+                        <Toolbar className="w-full bg-white">
+                            <div className="text-[#001F68] flex justify-between items-center container">
+                                <Typography
+                                    variant="h6"
+                                    component="div"
+                                >
+                                    {data?.title ?? "Title"}
+                                </Typography>
+                                <Box>
+                                    <WebCamComponent width={100} height={70} showBorder={false}
+                                        inAssessment={true} faceDetectionError={handleFaceDetectionViolation}
+                                        faceDetected={(res: boolean) => {
+                                        }} />
+                                </Box>
+                                <Box className="flex items-center gap-2">
+                                    {stopTimer ? null : <Timer timeOverCallback={timeOutHandler} totalTime={1} />}
+                                    <Button className="!rounded-lg !normal-case !py-1" variant="contained"
+                                        disableElevation={true}>
+                                        Submit Test
+                                    </Button>
+                                </Box>
+                            </div>
+                        </Toolbar>
+                    </AppBar>
+                    <Box className="mb-4">
+                        <Toolbar />
+                    </Box>
+                    <div className="container">
+                        <p className="text-xl font-semibold text-[#001F68] mb-4">Questions</p>
+                        <div className="grid grid-cols-4 gap-4 h-full mb-4 ">
+                            <div className="col">
+                                {questionData()}
+                            </div>
+
+                            <div className="col-span-3 h-full border !border-primary-50 rounded-xl p-4">
+                                {expanded && currentQuestion && expanded.type === AssessmentType.MCQ ? <>
+                                    <AssessmentMCQ question={currentQuestion} onUpdateQuestion={handleQuestionUpdate} />
+                                </> : expanded?.type === AssessmentType.CODING ? <>
+                                    {currentQuestion?.full_stack_evaluation ?
+                                        <FullStackIde flagAction={() => { currentQuestion.flagged = !currentQuestion?.flagged ?? false }} fullData={currentQuestion as SingleProblemInterface} customIde={true}
+                                            batchName={currentQuestion?.id.toString()} /> :
+                                        <ProgramIde fullData={currentQuestion as SingleProblemInterface} customIde={true}
+                                            batchName={currentQuestion?.id.toString()} />}
+                                </> : <>
+                                    <AssignmentIde fullData={currentQuestion as AssignmentIdeInterface} customIde={true}
+                                    // onCodeChange={captureAssignemtScore}
+                                    />
+                                </>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </> : <>
+                    You will be entering full screen mode for the assessment.
+                </>}
+
+            </FullScreen>
+
+            <Dialog
+                open={openModal}
+                onClose={handleClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description">
+
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description" className="text-center">
+                        <div className="text-2xl font-bold mb-3">You have just exited full screen! {Number(data?.max_violations as number - testViolation)} of {data?.max_violations} violations left. Click to enable full screen and continue</div>
+
+                        {!isFullScreen && (
+                            <Button variant="contained" ref={fullScreenRef} onClick={async () => {
+                                setFullScreen(true);
+                                setOpenModal(false);
+                                countTestViolation()
+                                await handle.enter();
+                            }}>Continue</Button>
+                        )}
+                    </DialogContentText>
+                </DialogContent>
+
+            </Dialog>
+        </div>
+    </section>
+}
+
+
+// for test 
+    // useEffect(() => {
+    //     let isMouseDown = false;
+
+    //     const handleMouseDown = () => {
+    //         isMouseDown = true;
+    //     };
+
+    //     const handleMouseUp = () => {
+    //         isMouseDown = false;
+    //     };
+
+    //     const handleMouseMove = (e: MouseEvent) => {
+    //         if (!isMouseDown) return;
+    //         e.stopPropagation();
+    //     };
+
+    //     const handleKeyDown = (e: KeyboardEvent) => {
+    //         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'r') {
+    //             e.stopPropagation();
+    //             e.preventDefault();
+    //             return;
+    //         }
+    //         if (e.ctrlKey && e.key.toLowerCase() === 'v') {
+    //             e.stopPropagation();
+    //             return;
+    //         }
+    //         if (e.key === "MediaTrackNext") {
+    //             e.stopPropagation();
+    //             return;
+    //         }
+    //         if (e.key === "MediaTrackPrevious") {
+    //             e.stopPropagation();
+    //             return;
+    //         }
+    //         if (e.key === 'F5') {
+    //             e.stopPropagation();
+    //             e.preventDefault();
+    //             return;
+    //         }
+    //         if (e.ctrlKey && e.key.toLowerCase() === 'c') {
+    //             e.stopPropagation();
+    //             return;
+    //         }
+    //         if (e.key === 'Tab' && e.altKey) {
+    //             e.stopPropagation();
+    //             return;
+    //         }
+    //         if (e.key === 'Tab' && e.ctrlKey) {
+    //             e.stopPropagation();
+    //             return;
+    //         }
+    //         if (e.key === 'Alt') {
+    //             e.stopPropagation();
+    //             return;
+    //         }
+    //     };
+
+    //     const handleVisibilityChange = (e: any) => {
+    //         e.stopPropagation();
+    //         if (document.hidden) {
+    //             setOpenModal(true);
+    //             setFullScreen(false);
+    //         }
+    //     };
+
+    //     const handleFullScreenChange = () => {
+    //         if (!document.fullscreenElement) {
+    //             handleEscape();
+    //         }
+    //     };
+
+    //     if (isFullScreen) {
+    //         document.body.classList.add('no-scroll');
+    //         window.addEventListener('mousedown', handleMouseDown);
+    //         window.addEventListener('mouseup', handleMouseUp);
+    //         window.addEventListener('mousemove', handleMouseMove);
+    //         window.addEventListener('touchstart', handleMouseDown);
+    //         window.addEventListener('touchend', handleMouseUp);
+    //         window.addEventListener('touchmove', handleEscape as EventListener);
+    //         window.addEventListener('keydown', handleKeyDown);
+    //         document.addEventListener('visibilitychange', handleVisibilityChange);
+    //         document.addEventListener("fullscreenchange", handleFullScreenChange, false);
+    //     } else {
+    //         document.body.classList.remove('no-scroll');
+    //         window.removeEventListener('mousedown', handleMouseDown);
+    //         window.removeEventListener('mouseup', handleMouseUp);
+    //         window.removeEventListener('mousemove', handleMouseMove);
+    //         window.removeEventListener('touchstart', handleMouseDown);
+    //         window.removeEventListener('touchend', handleMouseUp);
+    //         window.removeEventListener('touchmove', handleEscape as EventListener);
+    //         window.removeEventListener('keydown', handleKeyDown);
+    //         window.removeEventListener('touchstart', handleEscape as EventListener);
+    //         window.removeEventListener('visibilitychange', handleEscape, false);
+    //         document.removeEventListener("fullscreenchange", handleFullScreenChange, false);
+    //     }
+
+    //     return () => {
+    //         window.removeEventListener('mousedown', handleMouseDown);
+    //         window.removeEventListener('mouseup', handleMouseUp);
+    //         window.removeEventListener('mousemove', handleMouseMove);
+    //         window.removeEventListener('touchstart', handleMouseDown);
+    //         window.removeEventListener('touchend', handleMouseUp);
+    //         window.removeEventListener('touchmove', handleEscape as EventListener);
+    //         window.removeEventListener('keydown', handleKeyDown);
+    //         window.removeEventListener('touchstart', handleEscape as EventListener);
+    //         window.removeEventListener('visibilitychange', handleVisibilityChange);
+    //         document.removeEventListener("fullscreenchange", handleFullScreenChange, false);
+    //     };
+    // }, [isFullScreen]);
+
+    // function handleEscape() {
+    //     setOpenModal(true);
+    //     setFullScreen(false);
+    //     if (document.fullscreenElement) {
+    //         document.exitFullscreen().catch((err) => console.error(`Error exiting full-screen mode: ${err}`));
+    //     }
+    // }
+
+
+
+
+
+import { useEffect, useRef, useState } from "react";
+import { AssessmentData, AssessmentInterface, AssessmentItem, AssessmentQuestion, AssignmentIdeInterface, SelectedData, SingleProblemInterface } from "../../_utils/interface";
+import { useParams } from "react-router-dom";
+import { FullScreen, FullScreenHandle, useFullScreenHandle } from "react-full-screen";
+import { useAuth } from "hooks/AuthProvider";
+import { AppBar, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fade, Modal, Typography, useTheme } from "@mui/material";
+import Toolbar from '@mui/material/Toolbar';
+import Box from "@mui/material/Box";
+import WebCamComponent from "components/WebCam";
+import Timer from "components/Timer";
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { AssessmentType, examType, FaceDetectionEnum } from "../../_utils/enum";
+import AssessmentMCQ from "pages/AssessmentPage/AssessmentMCQ";
+import AssignmentIde from "pages/AssignmentIde";
+import FullStackIde from "pages/Full-stack-Ide";
+import ProgramIde from "pages/ProgramIde";
+import "./assessment.css";
+import axiosHttp from "_utils/axios.index";
+import { ApiConstants } from "_utils/api-constants";
+import { AxiosResponse } from "axios";
+import SectionTimer from "components/SectionTimer";
+
+export default function Assessment() {
+    const [data, setData] = useState<AssessmentData>();
+    const [currentQuestion, setCurrentQuestion] = useState<AssessmentQuestion>();
+    const { id } = useParams();
+    const handle = useFullScreenHandle();
+    const auth = useAuth();
+    const fullScreenRef = useRef<HTMLButtonElement>(null);
+    const [isFullScreen, setFullScreen] = useState<boolean>(false);
+    const [stopTimer, setStopTimer] = useState<boolean>(false);
+    const [expanded, setExpanded] = useState<AssessmentItem>();
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [openModal, setOpenModal] = useState<boolean>(false);
+    const [open, setOpen] = useState(false);
+    const [assessmentData, setAssessmentData] = useState<AssessmentInterface>();
+    let [testViolation, setTestViolation] = useState(0);
+    const [selectedAnswer, setSelectedAnswer] = useState<SelectedData>({
+        [examType.single]: {},
+        [examType.multi]: {},
+        [examType.subjective]: {},
+        [examType.coding]: {},
+    });
+    const [isSectionTimerActive, setIsSectionTimerActive] = useState(false);
+    const [isNavigationAllowed, setIsNavigationAllowed] = useState(true);
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+    useEffect(() => {
+        if (id) {
+            auth.setShowHeader(false);
+
+            axiosHttp.get(ApiConstants.problems.getQuestion(id)).then((res: AxiosResponse) => {
+                setData(res.data)
+            })
+            setTimeout(() => {
+                setExpanded(data?.assessment_items[0]);
+                setCurrentQuestion(data?.assessment_items[0]?.questions[0]);
+            }, 200)
+        }
+
+        return () => {
+            auth.setShowHeader(true);
+        }
+    }, [id, auth, data?.assessment_items]);
+
+    const handleChange = (panel: AssessmentItem) => (event: React.SyntheticEvent, newExpanded: boolean) => {
+        if (isNavigationAllowed) {
+            if (newExpanded) {
+                setExpanded(panel);
+                setCurrentQuestion(panel.questions[0]);
+                if (panel.duration) {
+                    setIsSectionTimerActive(true);
+                    setIsNavigationAllowed(false);
+                }
+            }
+        }
+    };
+
+    const handleQuestionChange = (question: AssessmentQuestion, index: number) => {
+        setCurrentQuestion(question);
+        setCurrentQuestionIndex(index);
+    };
+
+    const handleNextQuestion = () => {
+        if (expanded) {
+            const nextIndex = currentQuestionIndex + 1;
+            if (nextIndex < expanded.questions.length) {
+                handleQuestionChange(expanded.questions[nextIndex], nextIndex);
+            }
+        }
+    };
+
+    const handlePreviousQuestion = () => {
+        if (expanded) {
+            const prevIndex = currentQuestionIndex - 1;
+            if (prevIndex >= 0) {
+                handleQuestionChange(expanded.questions[prevIndex], prevIndex);
+            }
+        }
+    };
+
+    const handleQuestionUpdate = (updatedQuestion: AssessmentQuestion) => {
+        let tempData = { ...data } as AssessmentData;
+        tempData.assessment_items?.forEach((assessment_item) => {
+            if (assessment_item.type === expanded?.type) {
+                assessment_item.questions.forEach((question) => {
+                    if (question.id === updatedQuestion.id) {
+                        question["flagged"] = !question["flagged"];
+                    }
+                })
+            }
+        });
+        setData(tempData);
+    };
+
+    const timeOutHandler = () => {
+        sessionStorage.removeItem("endTime");
+        sessionStorage.removeItem("endTimeSection");
+        setStopTimer(true);
+        setIsNavigationAllowed(true); // Enable navigation when timer ends
+    };
+
+    const handleFullScreenChange = (state: boolean, fullScreenHandler: FullScreenHandle) => {
+        if (isFullScreen && !state) {
+            setOpenModal(true);
+            setFullScreen(false)
+        }
+    };
+
+    const handleSubmit = () => {
+        console.info(selectedAnswer);
+    };
+
+    const countTestViolation = () => {
+        testViolation = testViolation + 1;
+        setTestViolation(testViolation);
+        console.info(testViolation);
+        if (data && (data?.max_violations < testViolation)) {
+            setFullScreen(false);
+        }
+    };
+
+    const questionData = () => {
+        return (
+            <>
+                {data?.assessment_items.map((item, index) => (
+                    <Accordion
+                        key={index}
+                        sx={{
+                            borderRadius: "0.75rem",
+                            marginBottom: "0.5rem",
+                            overflow: "hidden",
+                            border: "1px solid #EBF3FF",
+                        }}
+                        onChange={isNavigationAllowed ? handleChange(item) : undefined}
+                        expanded={expanded?.type === item.type}
+                        elevation={0}
+                        disableGutters
+                        square
+                        variant="outlined"
+                        defaultExpanded={index === 0}
+                    >
+                        <AccordionSummary
+                            sx={{
+                                borderBottom: expanded?.type === item.type ? 'none' : ``,
+                                '& .MuiSvgIcon-root': {
+                                    transform: expanded?.type === item.type ? 'rotate(90deg)' : 'rotate(0deg)',
+                                    transition: 'transform 0.2s',
+                                },
+                            }}
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls={`panel${index}-content`}
+                            id={`panel${index}-header`}
+                        >
+                            <p className={`text-xl font-semibold ${expanded?.type === item.type ? 'text-[#1F1F1F]' : 'text-[#939393]'}`}>{item.title}</p>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <div className="grid grid-cols-5 gap-2">
+                                {item.questions.map((question, qIndex) => (
+                                    <div key={qIndex} className="w-full h-full flex justify-center items-center">
+                                        <div
+                                            onClick={() => handleQuestionChange(question, qIndex)}
+                                            className={`w-8 h-8 cursor-pointer flex justify-center items-center rounded border border-[#1F1F1F]
+                                            ${question?.flagged ? 'border border-orange-400 text-orange-400 bg-[#FFF4EB]' : ''} 
+                                            ${question?.answered ? 'border border-blue-400 text-blue-400 bg-[#008dea]' : ''}
+                                            ${currentQuestion?.id === question?.id ? 'border border-[#001F68] text-[#001F68] bg-[#EFF4FF]' : ''}`}
+                                        >
+                                            {qIndex + 1}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </AccordionDetails>
+                    </Accordion>
+                ))}
+            </>
+        );
+    };
+
+    const renderQuestion = () => {
+        if (expanded?.duration) {
+            return (
+                <div className="flex justify-end mb-1">
+                    <SectionTimer timeOverCallback={timeOutHandler} totalTime={expanded.duration as number} />
+                </div>
+            );
+        }
+
+        switch (expanded?.type) {
+            case AssessmentType.MCQ:
+                return (
+                    <AssessmentMCQ
+                        question={currentQuestion as AssessmentQuestion}
+                        onUpdateQuestion={handleQuestionUpdate}
+                        onNext={handleNextQuestion}
+                        onPrevious={handlePreviousQuestion}
+                        disableNext={currentQuestionIndex === (expanded?.questions.length - 1)}
+                        onAnswerSelected={
+                            (answer: string) => {
+                                setSelectedAnswer((prev: any) => ({
+                                    ...prev,
+                                    ...answer as any
+                                }));
+                            }
+                        }
+                        disablePrevious={currentQuestionIndex === 0}
+                    />
+                );
+
+            case AssessmentType.CODING:
+                if (currentQuestion?.full_stack_evaluation) {
+                    return (
+                        <FullStackIde
+                            flagAction={() => { currentQuestion.flagged = !currentQuestion?.flagged ?? false; }}
+                            fullData={currentQuestion as SingleProblemInterface}
+                            customIde={true}
+                            batchName={currentQuestion?.id.toString()}
+                            onCodeChange={(data: any) => {
+                                let current = currentQuestion as AssessmentQuestion
+                                setSelectedAnswer((prev: any) => ({
+                                    ...prev,
+                                    [examType.coding]: {
+                                        ...prev[examType.coding],
+                                        [current?.id]: data
+                                    }
+                                }));
+                            }}
+                        />
+                    );
+                } else {
+                    return (
+                        <ProgramIde
+                            fullData={currentQuestion as SingleProblemInterface}
+                            customIde={true}
+                            batchName={currentQuestion?.id.toString()}
+                            onCodeChange={(data: any) => {
+                                let current = currentQuestion as AssessmentQuestion
+                                setSelectedAnswer((prev: any) => ({
+                                    ...prev,
+                                    [examType.coding]: {
+                                        ...prev[examType.coding],
+                                        [current?.id]: data
+                                    }
+                                }));
+                            }}
+                        />
+                    );
+                }
+
+            case AssessmentType.SUBJECTIVE:
+                return (
+                    <AssignmentIde
+                        fullData={currentQuestion as AssignmentIdeInterface}
+                        customIde={true}
+                        onCodeChange={(data: any) => {
+                            let current = currentQuestion as AssessmentQuestion
+                            setSelectedAnswer((prev: any) => ({
+                                ...prev,
+                                [examType.subjective]: {
+                                    ...prev[examType.subjective],
+                                    [current?.id]: data
+                                }
+                            }));
+                        }}
+                    />
+                );
+
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <FullScreen handle={handle} onChange={(state: boolean) => handleFullScreenChange(state, handle)}>
+            <div className="flex flex-col h-screen">
+                <AppBar position="fixed">
+                    <Toolbar className="bg-white border-b border-gray-200">
+                        <Typography variant="h6" className="flex-1">
+                            {data?.title}
+                        </Typography>
+                        <Button color="inherit" onClick={() => handle.enter()}>Enter Fullscreen</Button>
+                    </Toolbar>
+                </AppBar>
+                <Toolbar />
+                <div className="flex-grow overflow-auto p-4">
+                    {questionData()}
+                    <div className="mt-4">
+                        {renderQuestion()}
+                    </div>
+                </div>
+                <div className="p-4 border-t border-gray-200 bg-white">
+                    <Button variant="contained" color="primary" onClick={handleSubmit}>Submit</Button>
+                </div>
+                {isSectionTimerActive && (
+                    <Modal
+                        open={openModal}
+                        onClose={() => setOpenModal(false)}
+                        aria-labelledby="simple-modal-title"
+                        aria-describedby="simple-modal-description"
+                    >
+                        <Fade in={openModal}>
+                            <div className="modal-content">
+                                <h2 id="simple-modal-title">Fullscreen Violation</h2>
+                                <p id="simple-modal-description">You have violated the fullscreen policy.</p>
+                                <Button onClick={() => setOpenModal(false)}>Close</Button>
+                            </div>
+                        </Fade>
+                    </Modal>
+                )}
+                <Dialog
+                    open={open}
+                    onClose={handleClose}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">{"Fullscreen Violation"}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            You have violated the fullscreen policy.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleClose} color="primary">
+                            Close
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </div>
+        </FullScreen>
+    );
+}

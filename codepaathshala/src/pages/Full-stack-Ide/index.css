@@ -1,0 +1,11 @@
+.description{
+    width: 100% !important;
+    overflow-x: auto;
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        
+        padding: 0.5rem;
+       
+    }
+}

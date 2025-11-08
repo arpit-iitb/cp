@@ -1,0 +1,24 @@
+.no-scroll {
+    overflow-x: hidden;
+    overscroll-behavior-x: none !important;
+}
+
+html,
+body {
+    overscroll-behavior-x: none;
+}
+
+.no-scroll,
+.no-scroll * {
+    touch-action: none;
+    overscroll-behavior-x: none !important;
+}
+
+.no-scroll {
+    overscroll-behavior: none;
+    overscroll-behavior-x: none !important;
+}
+
+.assessment-bg {
+    background-color: #ffffff;
+}

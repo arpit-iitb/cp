@@ -1,0 +1,15 @@
+.custom-outline {
+
+    outline: 1px solid #1976d2;
+    color: #1976d2
+}
+.custom-outline:hover{
+   background-color:#1976d2;
+   color: white;
+}
+
+.vertical-text {
+    writing-mode: vertical-lr;
+    overflow: visible;
+    width: fit-content; 
+}

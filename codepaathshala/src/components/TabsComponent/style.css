@@ -1,0 +1,52 @@
+.MuiTabs-scroller, .MuiTabs-scroller * {
+    max-height: 50px !important;
+}
+.MuiTab-labelIcon {
+    max-height: 50px !important;
+    min-height: 0 !important;
+}
+.description{
+    width: 100% !important;
+    overflow-x: auto;
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+        padding: 0.2rem;
+    }
+}
+
+/* .react-swipeable-view-container, .react-swipeable-view-container div {
+    height: fit-content !important;
+} */
+@media (max-width:600px) {
+    .docs-frame {
+        transform: translate(-72px, -72px);
+        overflow-x: hidden;
+    }
+}
+.h-98{
+    height: 30rem !important;
+    overflow-y: auto;
+}
+
+.h-98-custom{
+    height: 30rem !important;
+    overflow-y: auto;
+}
+
+@media (min-width: 1600px) {
+    .h-98-custom {
+        height: 33rem !important; 
+    }
+}
+
+@media (min-width: 1750px) {
+    .h-98-custom {
+        height: 36rem !important; 
+    }
+}
+@media (min-width: 1900px) {
+    .h-98-custom {
+        height: 40rem !important; 
+    }
+}

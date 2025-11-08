@@ -1,0 +1,6 @@
+.cleanslate .docked-widget{
+    z-index: 0 !important;
+    top: 78px !important;
+    overflow-y: scroll !important;
+    height: 90vh !important;
+}
